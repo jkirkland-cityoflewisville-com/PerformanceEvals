@@ -29,9 +29,11 @@
     <!-- axios -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
-    <style> 
+    <style>
+        [v-cloak] {display: none}
     </style>
 </head>
+
 <body style="background-color:whitesmoke;">
     
     <div id="app" v-cloak>
@@ -40,28 +42,58 @@
                 <div class="nav-wrapper deep-purple white-text">
                     <a class="brand-logo">&nbsp Evaluation Forms</a>
                 </div>
-            </nav>
+            </nav>       
         </div> <!--end navbar-->
+       
+        <!--Username-->
         <div class="row">
             <div class="col s12">
                 {{username}}
             </div>
         </div>
-        <br>
-        <br>
+        
 
-        <div class="container white" style="height: calc(100vh - 105px); padding:1.5em;">
-
-            <!--Form Types-->
+        <div class="container white" style="height: calc(100vh - 105px); padding:1.5em; box-shadow: 0 0 0 0.75pt #d1d1d1, 0 0 3pt 0.75pt #ccc;">     
+            <!--Welcome-->
             <div class="row">
-                <div class="col s12 center-align">
-                    <a class="waves-effect waves-light btn" @click="formType='accomplishments'; getRecords('accomplishments')" :class="{'blue': formType=='accomplishments'}">Accomplishments</a>
-                    <a class="waves-effect waves-light btn" @click="formType='self_assessments'; getRecords('self_assessments')" :class="{'blue': formType=='self_assessments'}">Self Assessments</a>
-                    <a class="waves-effect waves-light btn" @click="formType='evaluations'; getRecords('evaluations')" :class="{'blue': formType=='evaluations'}">Evaluations</a>
-                    <a class="waves-effect waves-light btn" @click="formType='supervisor_logs'; getRecords('supervisor_logs')" :class="{'blue': formType=='supervisor_logs'}">Supervisor Logs</a>
+                <div class="col s12">
+                    <p>
+                        <h5 class="center-align purple-text text-darken-3">City of Lewisville - Performance Evaluation System</h5>
+                        <p class="center-align">Use the menu options in the header to view the following:</p>
+                        <ul class="collection">
+                            <li class="collection-item">
+                                <b>Accomplishments</b> <br> Things you have accomplished through the year.
+                                <br>
+                                <a href="http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=90" target="_blank">New</a>
+                                &nbsp <span class="grey-text">|</span> &nbsp
+                                <a href="" @click="formType='accomplishments'; getRecords('accomplishments')">View All</a>
+                            </li>
+                            <li class="collection-item">
+                                <b>Supervisor Logs</b> <br> Supervisors should use this area to log counseling, oral reprimands, written reprimands and suspensions.
+                                <br>
+                                <a href="http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=88" target="_blank">New</a>
+                                &nbsp <span class="grey-text">|</span> &nbsp
+                                <a href="" @click="formType='supervisor_logs'; getRecords('supervisor_logs')">View All</a>
+                            </li>
+                            <li class="collection-item">
+                                <b>Self Assessments</b> <br> Employees will receive an email 30 days before their evaluation due-date with a link to their self assessment form.
+                                <br>
+                                <i>New</i> self assessments can only be started once the employee receives the email with the link.
+                                <br>
+                                <a href="" @click="formType='supervisor_logs'; getRecords('self_assessments')">View All</a>
+                            </li>
+                            <li class="collection-item">
+                                <b>Evaluations</b> <br> Supervisors will receive an email 30 days pior to an employee's evaluation due-date with a link to the evaluation form.
+                                <br>
+                                <i>New</i> evaluations can only be started once the supervisor receives the email with the link.
+                                <br>
+                                <a href="" @click="formType='evaluations'; getRecords('evaluations')">View All</a>
+                            </li>
+                        </ul>
+                    </p>
                 </div>
-            </div>         
-            
+            </div>
+
             <!--Records Loading-->
             <div class="row" v-show="recordsAreLoading == true">
                 <div class="col s12 center-align">
@@ -93,8 +125,9 @@
 
     </div>  <!--end app-->
 
-
+    <!--=======================================================-->
     <!--Javascript-->
+    <!--=======================================================-->
     <script>
         "use strict"
 
@@ -111,6 +144,14 @@
                 init: function(){
                     var _this = this
                     _this.username = localStorage.colEmail
+
+                    //Dropdowns
+                    var _dropdownElements = document.querySelectorAll('.dropdown-trigger');
+                    var _dropdownInstances = M.Dropdown.init(_dropdownElements);
+
+                    //Sidenav trigger
+                    var _sidenavElements = document.querySelectorAll('.sidenav');
+                    var _sidenavInstances = M.Sidenav.init(_sidenavElements);
                 },
                 getRecords: function(_formType){
                     var _this = this
@@ -167,6 +208,7 @@
         document.addEventListener('DOMContentLoaded', function(){
             app.init()
         })
+        
     </script>
 </body>
 </html> 
