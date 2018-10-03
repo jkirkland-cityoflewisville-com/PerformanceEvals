@@ -13,15 +13,12 @@
     <meta name="msapplication-TileColor" content="#603cba">
     <meta name="theme-color" content="#ffffff">
 
-    <!-- styles -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Product+Sans:400,400i,700,700i" rel="stylesheet" type="text/css">
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">    
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Product+Sans:400,400i,700,700i" rel="stylesheet" type="text/css">
 
-    <!-- materialize -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!--Fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 
     <!--VueJS-->
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
@@ -29,8 +26,16 @@
     <!-- axios -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
+    <!--Security-->
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="oauth/colsecurity.js""></script>
+
     <style>
         [v-cloak] {display: none}
+        .container{max-width: 950px; padding:1.5em; padding-bottom:3em; margin-bottom:20em !important; box-shadow: 0 0 0 0.75pt #d1d1d1, 0 0 3pt 0.75pt #ccc;}        
+        .collection-header >h5 {margin-top:10px; margin-bottom:2px; margin-left:5px;}
+        .collection-item {padding-top:2px !important;}
+        .collection-item > h6 {text-decoration: underline;}
     </style>
 </head>
 
@@ -48,46 +53,56 @@
         <!--Username-->
         <div class="row">
             <div class="col s12">
-                {{username}}
+                {{(username.length == 0 ? "Getting username..." : username)}}
             </div>
         </div>
         
 
-        <div class="container white" style="height: calc(100vh - 105px); padding:1.5em; box-shadow: 0 0 0 0.75pt #d1d1d1, 0 0 3pt 0.75pt #ccc;">     
+        <div class="container white">     
             <!--Welcome-->
             <div class="row">
                 <div class="col s12">
                     <p>
                         <h5 class="center-align purple-text text-darken-3">City of Lewisville - Performance Evaluation System</h5>
-                        <p class="center-align">Use the menu options in the header to view the following:</p>
-                        <ul class="collection">
+                        <br>
+                        <ul class="collection white">
+
+                            <!--Year-Round Forms-->
+                            <li class="collection-header purple-text text-darken-3"><h5>Year-Round Forms</h5></li>
                             <li class="collection-item">
-                                <b>Accomplishments</b> <br> Things you have accomplished through the year.
+                                <h6>Accomplishments</h6>
+                                Use this form to keep a log of your accomplishments throughout the year. You should refer to these when completing your annual self assessment.
                                 <br>
-                                <a href="http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=90" target="_blank">New</a>
+                                <a class="waves-effect waves-teal btn-flat blue-text" href="http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=90" target="_blank">New</a>
                                 &nbsp <span class="grey-text">|</span> &nbsp
-                                <a href="" @click="formType='accomplishments'; getRecords('accomplishments')">View All</a>
+                                <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='accomplishments'; getRecords('accomplishments')">View All</a>
                             </li>
                             <li class="collection-item">
-                                <b>Supervisor Logs</b> <br> Supervisors should use this area to log counseling, oral reprimands, written reprimands and suspensions.
+                                <h6>Supervisor Logs</h6> 
+                                Supervisors should use this area to log counseling, oral reprimands, written reprimands and suspensions.
                                 <br>
-                                <a href="http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=88" target="_blank">New</a>
+                                <a class="waves-effect waves-teal btn-flat blue-text" href="http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=88" target="_blank">New</a>
                                 &nbsp <span class="grey-text">|</span> &nbsp
-                                <a href="" @click="formType='supervisor_logs'; getRecords('supervisor_logs')">View All</a>
+                                <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='supervisor_logs'; getRecords('supervisor_logs')">View All</a>
                             </li>
+
+                            <!--Annual Forms-->
+                            <li class="collection-header purple-text text-darken-3"><h5>Annual Evaluation Forms</h5></li>
                             <li class="collection-item">
-                                <b>Self Assessments</b> <br> Employees will receive an email 30 days before their evaluation due-date with a link to their self assessment form.
+                                <h6>Self Assessments</h6>
+                                Employees will receive an email 30 days before their evaluation due-date with a link to their self assessment form.
                                 <br>
                                 <i>New</i> self assessments can only be started once the employee receives the email with the link.
                                 <br>
-                                <a href="" @click="formType='supervisor_logs'; getRecords('self_assessments')">View All</a>
+                                <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='self_assessments'; getRecords('self_assessments')">View All</a>
                             </li>
                             <li class="collection-item">
-                                <b>Evaluations</b> <br> Supervisors will receive an email 30 days pior to an employee's evaluation due-date with a link to the evaluation form.
+                                <h6>Evaluations</h6> 
+                                Supervisors will receive an email 30 days pior to an employee's evaluation due-date with a link to the evaluation form.
                                 <br>
                                 <i>New</i> evaluations can only be started once the supervisor receives the email with the link.
                                 <br>
-                                <a href="" @click="formType='evaluations'; getRecords('evaluations')">View All</a>
+                                <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='evaluations'; getRecords('evaluations')">View All</a>
                             </li>
                         </ul>
                     </p>
@@ -104,7 +119,7 @@
             <!--No records found-->
             <div class="row" v-show="noRecordsFound == true">
                     <div class="col s12 center-align">
-                        No Records Found
+                        No {{formTypePretty}} Found
                     </div>
                 </div>
 
@@ -114,7 +129,7 @@
                     <h4>{{formTypePretty}}</h4>
                     <div class="row" v-for="record in records">
                         <div class="col s12">
-                            <a :href="record.link">{{record.EmployeeName}} <span v-if="formType=='self_assessments' || formType=='evaluations'"> | {{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</span></a>
+                            <a :href="record.link" target="_blank">{{record.EmployeeName}} <span v-if="formType=='self_assessments' || formType=='evaluations'"> | {{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</span></a>
                         </div>                        
                         <div class="col s12"><hr></div>
                     </div>
@@ -138,20 +153,14 @@
                 recordsAreLoading: false,
                 noRecordsFound: false,
                 formType: "",
-                username: ''
+                username: ""
             },
             methods: {
                 init: function(){
                     var _this = this
-                    _this.username = localStorage.colEmail
-
-                    //Dropdowns
-                    var _dropdownElements = document.querySelectorAll('.dropdown-trigger');
-                    var _dropdownInstances = M.Dropdown.init(_dropdownElements);
-
-                    //Sidenav trigger
-                    var _sidenavElements = document.querySelectorAll('.sidenav');
-                    var _sidenavInstances = M.Sidenav.init(_sidenavElements);
+                    setTimeout(function(){
+                        _this.username = localStorage.colEmail
+                    },1500)
                 },
                 getRecords: function(_formType){
                     var _this = this
