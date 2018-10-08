@@ -5,12 +5,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
 
-    <title>Evals - Self Assessments</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+    <title>Eval Home</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    <link rel="manifest" href="icons/site.webmanifest">
+    <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="icons/favicon.ico">
     <meta name="msapplication-TileColor" content="#603cba">
+    <meta name="msapplication-config" content="icons/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
 
     <!-- Materialize CSS -->
@@ -32,10 +35,11 @@
 
     <style>
         [v-cloak] {display: none}
+        *{font-family:Roboto;}
         .container{max-width: 950px; padding:1.5em; padding-bottom:3em; margin-bottom:20em !important; box-shadow: 0 0 0 0.75pt #d1d1d1, 0 0 3pt 0.75pt #ccc;}        
         .collection-header >h5 {margin-top:10px; margin-bottom:2px; margin-left:5px;}
         .collection-item {padding-top:2px !important;}
-        .collection-item > h6 {text-decoration: underline;}
+        .collection-item > h6 {font-weight: bold;}
     </style>
 </head>
 
@@ -67,32 +71,13 @@
                         <br>
                         <ul class="collection white">
 
-                            <!--Year-Round Forms-->
-                            <li class="collection-header purple-text text-darken-3"><h5>Year-Round Forms</h5></li>
-                            <li class="collection-item">
-                                <h6>Accomplishments</h6>
-                                Use this form to keep a log of your accomplishments throughout the year. You should refer to these when completing your annual self assessment.
-                                <br>
-                                <a class="waves-effect waves-teal btn-flat blue-text" href="http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=90" target="_blank">New</a>
-                                &nbsp <span class="grey-text">|</span> &nbsp
-                                <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='accomplishments'; getRecords('accomplishments')">View All</a>
-                            </li>
-                            <li class="collection-item">
-                                <h6>Supervisor Logs</h6> 
-                                Supervisors should use this area to log counseling, oral reprimands, written reprimands and suspensions.
-                                <br>
-                                <a class="waves-effect waves-teal btn-flat blue-text" href="http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=88" target="_blank">New</a>
-                                &nbsp <span class="grey-text">|</span> &nbsp
-                                <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='supervisor_logs'; getRecords('supervisor_logs')">View All</a>
-                            </li>
-
                             <!--Annual Forms-->
-                            <li class="collection-header purple-text text-darken-3"><h5>Annual Evaluation Forms</h5></li>
+                            <!--<li class="collection-header purple-text text-darken-3"><h5>Annual Evaluation Forms</h5></li>-->
                             <li class="collection-item">
-                                <h6>Self Assessments</h6>
-                                Employees will receive an email 30 days before their evaluation due-date with a link to their self assessment form.
+                                <h6>Employee Input Form</h6>
+                                Employees will receive an email 30 days before their evaluation due-date with a link to their input-form.
                                 <br>
-                                <i>New</i> self assessments can only be started once the employee receives the email with the link.
+                                <i>New</i> Employee Input Forms can only be started once the employee receives the email with the link.
                                 <br>
                                 <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='self_assessments'; getRecords('self_assessments')">View All</a>
                             </li>
@@ -103,6 +88,16 @@
                                 <i>New</i> evaluations can only be started once the supervisor receives the email with the link.
                                 <br>
                                 <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='evaluations'; getRecords('evaluations')">View All</a>
+                            </li>
+
+                            <!--<li class="collection-header purple-text text-darken-3"><h5>Supervisor Logs</h5></li>-->
+                            <li class="collection-item">
+                                <h6>Supervisor Logs</h6> 
+                                Supervisors should use this area to log counseling, oral reprimands, written reprimands and suspensions.
+                                <br>
+                                <a class="waves-effect waves-teal btn-flat blue-text" href="http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=88" target="_blank">New</a>
+                                &nbsp <span class="grey-text">|</span> &nbsp
+                                <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='supervisor_logs'; getRecords('supervisor_logs')">View All</a>
                             </li>
                         </ul>
                     </p>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+
+    <title>Evaluation</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="manifest" href="../icons/site.webmanifest">
+    <link rel="mask-icon" href="../icons/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="../icons/favicon.ico">
+    <meta name="msapplication-TileColor" content="#603cba">
+    <meta name="msapplication-config" content="../icons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!--Fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+    <!--VueJS-->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!--Security-->
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="../oauth/colsecurity.js""></script>
+
+    <style>
+        [v-cloak] {display: none}
+        iframe {width:100%; height: calc(100vh - 250px);}
+    </style>
+</head>
+
+<body style="background-color:whitesmoke;">
+    
+    <div id="app" v-cloak>
+        <div class="navbar">
+            <nav>
+                <div class="nav-wrapper deep-purple white-text">
+                    <a class="brand-logo">&nbsp Evaluation Forms</a>
+                </div>
+            </nav>       
+        </div> <!--end navbar-->
+       
+        <!--Username-->
+        <div class="row">
+            <div class="col s12">
+                {{(username.length == 0 ? "Getting username..." : username)}}
+            </div>
+        </div>
+        
+
+        <div class="main white">     
+            
+            <div class="row">
+                
+                <!--Self assessment-->
+                <div class="col s6">
+                    <h5>Self assessment</h5>
+                    <br>
+                    <iframe :src="url_SA"></iframe>
+                </div>
+
+                <!--Evaluation-->
+                <div class="col s6" style="border-left: solid 1px black;">
+                    <h5>Evaluation</h5>
+                    <br>
+                    <iframe :src="url_Eval"></iframe>
+                </div>
+
+            </div>
+
+        </div> <!--end container-->
+
+    </div>  <!--end app-->
+
+    <!--=======================================================-->
+    <!--Javascript-->
+    <!--=======================================================-->
+    <script>
+        "use strict"
+
+        var app = new Vue({
+            el: "#app",
+            data: {                
+                username: "",
+                evalId: "",
+                selfAssessmentId: "",
+                urlTemplate_Eval: "http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=87&recordNumber={{recordNumber}}",
+                url_Eval: "",
+                urlTemplate_SA: "http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=86&recordNumber={{recordNumber}}",
+                url_SA: "",
+                noRecordsFound: false,
+                recordsAreLoading: false
+            },
+            methods: {
+
+                init: function(){
+                    var _this = this
+
+                    //Oauth
+                    setTimeout(function(){
+                        _this.username = localStorage.colEmail
+                    },1500)
+
+                    _this.evalId = _this.getUrlParameter("recordNumber")
+                    _this.url_Eval = _this.urlTemplate_Eval.replace("{{recordNumber}}",_this.evalId)
+                    _this.setSelfAssessmentId(_this.evalId)
+                },
+
+                getUrlParameter: function(_name){
+                    return decodeURIComponent((new RegExp('[?|&|]' + _name.toLowerCase() + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search.toLowerCase())||[,""])[1].replace(/\+/g, '%20'))||null;
+                },
+
+                setSelfAssessmentId: function(_evalId){
+                    var _this = this
+
+                    //Reset variables
+                    _this.selfAssessmentId = ""
+                    _this.recordsAreLoading = true
+                    _this.noRecordsFound = false
+                    
+                    axios.post('https://query.cityoflewisville.com/v2', {
+                        webservice: "Evals_SelfAssessments_GetId",
+                        auth_token: localStorage.colAuthToken,
+                        evalid: _evalId
+                    })
+                    .then(function(_results){  
+                        console.log(_results)
+                        if (typeof _results.data[0][0] != 'undefined'){
+                            _this.selfAssessmentId = _results.data[0]
+
+                            if (_this.selfAssessmentId.length == 0){
+                                _this.noRecordsFound = true
+                            }else{
+                                _this.url_SA = _this.urlTemplate_SA.replace("{{recordNumber}}",_this.selfAssessmentId)
+                            }
+                        }else{
+                            _this.selfAssessmentId = ""
+                            _this.noRecordsFound = true
+                            _this.recordsAreLoading = false
+                        }
+                        _this.recordsAreLoading = false
+                    })
+                    .catch(function(error){ 
+                        console.error(error)
+                        _this.selfAssessmentId = ""
+                        _this.noRecordsFound = true
+                        _this.recordsAreLoading = false
+                    })
+                }
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function(){
+            app.init()
+        })
+        
+    </script>
+</body>
+</html> 
