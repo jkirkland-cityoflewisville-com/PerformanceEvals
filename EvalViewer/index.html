@@ -36,6 +36,7 @@
     <style>
         [v-cloak] {display: none}
         iframe {width:100%; height: calc(100vh - 250px);}
+        table td{padding-top: 8px; padding-bottom: 8px;}
     </style>
 </head>
 
@@ -62,11 +63,32 @@
             
             <div class="row">
                 
-                <!--Self assessment-->
+                <!--Employee-Input Form-->
                 <div class="col s6">
-                    <h5>Self assessment</h5>
+                    <h5>Employee Input Form</h5>
                     <br>
-                    <iframe :src="url_SA"></iframe>
+                    <table style="margin-left: 1em;">
+                        <tr><td><b>Evaluation_Period_Start_Date</b></td></tr>
+                        <tr><td>{{employeeInput.Evaluation_Period_Start_Date}}</td></tr>
+
+                        <tr><td><b>Evaluation_Period_End_Date</b></td></tr>
+                        <tr><td>{{employeeInput.Evaluation_Period_End_Date}}</td></tr>
+
+                        <tr><td><b>Question_Accomplishments_Past_Review_Period</b></td></tr>
+                        <tr><td>{{employeeInput.Question_Accomplishments_Past_Review_Period}}</td></tr>
+
+                        <tr><td><b>Question_Strengths_Opportunities</b></td></tr>
+                        <tr><td>{{employeeInput.Question_Strengths_Opportunities}}</td></tr>
+
+                        <tr><td><b>Question_Suggestions_Or_Comments</b></td></tr>
+                        <tr><td>{{employeeInput.Question_Suggestions_Or_Comments}}</td></tr>
+
+                        <tr><td><b>Question_What_Can_City_Do</b></td></tr>
+                        <tr><td>{{employeeInput.Question_What_Can_City_Do}}</td></tr>
+
+                        <tr><td><b>Question_Work_Challenges</b></td></tr>
+                        <tr><td>{{employeeInput.Question_Work_Challenges}}</td></tr>
+                    </table>
                 </div>
 
                 <!--Evaluation-->
@@ -93,7 +115,8 @@
             data: {                
                 username: "",
                 evalId: "",
-                selfAssessmentId: "",
+                employeeInputId: "",
+                employeeInput: [],
                 urlTemplate_Eval: "http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=87&recordNumber={{recordNumber}}",
                 url_Eval: "",
                 urlTemplate_SA: "http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=86&recordNumber={{recordNumber}}",
@@ -110,21 +133,28 @@
                     setTimeout(function(){
                         _this.username = localStorage.colEmail
                     },1500)
-
+                    
+                    //Evaluation Id
                     _this.evalId = _this.getUrlParameter("recordNumber")
+
+                    //Evaluation iframe src
                     _this.url_Eval = _this.urlTemplate_Eval.replace("{{recordNumber}}",_this.evalId)
-                    _this.setSelfAssessmentId(_this.evalId)
+                    
+                    //Employee-Input data
+                    _this.getEmployeeInputId(_this.evalId,function(){
+                        _this.getEmployeeInput(_this.employeeInputId)
+                    })
                 },
 
                 getUrlParameter: function(_name){
                     return decodeURIComponent((new RegExp('[?|&|]' + _name.toLowerCase() + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search.toLowerCase())||[,""])[1].replace(/\+/g, '%20'))||null;
                 },
 
-                setSelfAssessmentId: function(_evalId){
+                getEmployeeInputId: function(_evalId, _callback){
                     var _this = this
 
                     //Reset variables
-                    _this.selfAssessmentId = ""
+                    _this.employeeInputId = ""
                     _this.recordsAreLoading = true
                     _this.noRecordsFound = false
                     
@@ -133,18 +163,17 @@
                         auth_token: localStorage.colAuthToken,
                         evalid: _evalId
                     })
-                    .then(function(_results){  
-                        console.log(_results)
+                    .then(function(_results){
+                        console.group("getEmployeeInputId")  
+                        console.log(_results.data)
+                        console.groupEnd()
                         if (typeof _results.data[0][0] != 'undefined'){
-                            _this.selfAssessmentId = _results.data[0]
+                            _this.employeeInputId = _results.data[0][0].RecordNumber
 
-                            if (_this.selfAssessmentId.length == 0){
-                                _this.noRecordsFound = true
-                            }else{
-                                _this.url_SA = _this.urlTemplate_SA.replace("{{recordNumber}}",_this.selfAssessmentId)
-                            }
+                            //Execute callback
+                            _callback()
                         }else{
-                            _this.selfAssessmentId = ""
+                            _this.employeeInputId = ""
                             _this.noRecordsFound = true
                             _this.recordsAreLoading = false
                         }
@@ -152,7 +181,37 @@
                     })
                     .catch(function(error){ 
                         console.error(error)
-                        _this.selfAssessmentId = ""
+                        _this.employeeInputId = ""
+                        _this.noRecordsFound = true
+                        _this.recordsAreLoading = false
+                    })
+                },
+
+                getEmployeeInput: function(_employeeInputId){
+                    var _this = this
+
+                    axios.post('https://query.cityoflewisville.com/v2', {
+                        webservice: "Evals_EmployeeInputForm_Get_ById",
+                        auth_token: localStorage.colAuthToken,
+                        recordnumber: _employeeInputId
+                    })
+                    .then(function(_results){  
+                        console.group("getEmployeeInput")  
+                        console.log(_results.data)
+                        console.groupEnd()
+
+                        if (typeof _results.data[0][0] != 'undefined'){
+                            _this.employeeInput = _results.data[0][0] //first record only
+                        }else{
+                            _this.employeeInputId = ""
+                            _this.noRecordsFound = true
+                            _this.recordsAreLoading = false
+                        }
+                        _this.recordsAreLoading = false
+                    })
+                    .catch(function(error){ 
+                        console.error(error)
+                        _this.employeeInputId = ""
                         _this.noRecordsFound = true
                         _this.recordsAreLoading = false
                     })

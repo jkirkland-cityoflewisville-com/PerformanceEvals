@@ -36,10 +36,11 @@
     <style>
         [v-cloak] {display: none}
         *{font-family:Roboto;}
-        .container{max-width: 950px; padding:1.5em; padding-bottom:3em; margin-bottom:20em !important; box-shadow: 0 0 0 0.75pt #d1d1d1, 0 0 3pt 0.75pt #ccc;}        
+        .container{max-width: 1100px; padding:1.5em; padding-bottom:3em; margin-bottom:20em !important; box-shadow: 0 0 0 0.75pt #d1d1d1, 0 0 3pt 0.75pt #ccc;}        
         .collection-header >h5 {margin-top:10px; margin-bottom:2px; margin-left:5px;}
         .collection-item {padding-top:2px !important;}
         .collection-item > h6 {font-weight: bold;}
+        .collection-item > a {margin-left:-13px;}
     </style>
 </head>
 
@@ -67,7 +68,7 @@
             <div class="row">
                 <div class="col s12">
                     <p>
-                        <h5 class="center-align purple-text text-darken-3">City of Lewisville - Performance Evaluation System</h5>
+                        <h4 class="center-align purple-text text-darken-3">City of Lewisville - Performance Evaluation System</h4>
                         <br>
                         <ul class="collection white">
 
@@ -203,7 +204,7 @@
                     var _formTypePretty = 'Unknown'
                     if (_this.formType == 'accomplishments'){ _formTypePretty = 'Accomplishments' }
                     if (_this.formType == 'evaluations'){ _formTypePretty = 'Evaluations' }
-                    if (_this.formType == 'self_assessments'){ _formTypePretty = 'Self Assessments' }
+                    if (_this.formType == 'self_assessments'){ _formTypePretty = 'Employee-Input Forms' }
                     if (_this.formType == 'supervisor_logs'){ _formTypePretty = 'Supervisor Logs' }
                     return _formTypePretty
                 }
