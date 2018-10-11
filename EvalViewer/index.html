@@ -46,7 +46,7 @@
         <div class="navbar">
             <nav>
                 <div class="nav-wrapper deep-purple white-text">
-                    <a class="brand-logo">&nbsp Evaluation Forms</a>
+                    <a class="brand-logo">&nbsp Evaluation</a>
                 </div>
             </nav>       
         </div> <!--end navbar-->
@@ -59,42 +59,62 @@
         </div>
         
 
-        <div class="main white">     
+        <div class="main white" style="margin-left:1em; margin-right:1em; border:solid 1px black;">     
             
-            <div class="row">
+            <div class="row">                
                 
-                <!--Employee-Input Form-->
-                <div class="col s6">
-                    <h5>Employee Input Form</h5>
+                <div class="col m5 s12" style="overflow-y:scroll;">
+                    
+                    <!--Employee-Input Form-->
+                    <h4>Employee Input Form</h4>
+                    <table style="margin-left: 1em; font-size:0.8em;">
+                        <tr><td><b>Eval Period: Start</b></td><td><b>Eval Period: End</b></td></tr>
+                        <tr><td>{{employeeInput.Evaluation_Period_Start_Date}}</td><td>{{employeeInput.Evaluation_Period_End_Date}}</td></tr>
+
+                        <tr><td colspan="2"><b>Question_Accomplishments_Past_Review_Period</b></td></tr>
+                        <tr><td colspan="2">{{employeeInput.Question_Accomplishments_Past_Review_Period}}</td></tr>
+
+                        <tr><td colspan="2"><b>Question_Strengths_Opportunities</b></td></tr>
+                        <tr><td colspan="2">{{employeeInput.Question_Strengths_Opportunities}}</td></tr>
+
+                        <tr><td colspan="2"><b>Question_Suggestions_Or_Comments</b></td></tr>
+                        <tr><td colspan="2">{{employeeInput.Question_Suggestions_Or_Comments}}</td></tr>
+
+                        <tr><td colspan="2"><b>Question_What_Can_City_Do</b></td></tr>
+                        <tr><td colspan="2">{{employeeInput.Question_What_Can_City_Do}}</td></tr>
+
+                        <tr><td colspan="2"><b>Question_Work_Challenges</b></td></tr>
+                        <tr><td colspan="2">{{employeeInput.Question_Work_Challenges}}</td></tr>
+                    </table>
                     <br>
-                    <table style="margin-left: 1em;">
-                        <tr><td><b>Evaluation_Period_Start_Date</b></td></tr>
-                        <tr><td>{{employeeInput.Evaluation_Period_Start_Date}}</td></tr>
 
-                        <tr><td><b>Evaluation_Period_End_Date</b></td></tr>
-                        <tr><td>{{employeeInput.Evaluation_Period_End_Date}}</td></tr>
-
-                        <tr><td><b>Question_Accomplishments_Past_Review_Period</b></td></tr>
-                        <tr><td>{{employeeInput.Question_Accomplishments_Past_Review_Period}}</td></tr>
-
-                        <tr><td><b>Question_Strengths_Opportunities</b></td></tr>
-                        <tr><td>{{employeeInput.Question_Strengths_Opportunities}}</td></tr>
-
-                        <tr><td><b>Question_Suggestions_Or_Comments</b></td></tr>
-                        <tr><td>{{employeeInput.Question_Suggestions_Or_Comments}}</td></tr>
-
-                        <tr><td><b>Question_What_Can_City_Do</b></td></tr>
-                        <tr><td>{{employeeInput.Question_What_Can_City_Do}}</td></tr>
-
-                        <tr><td><b>Question_Work_Challenges</b></td></tr>
-                        <tr><td>{{employeeInput.Question_Work_Challenges}}</td></tr>
+                    <!--Supervisor Logs-->
+                    <h4>Supervisor Logs</h4>                    
+                    <table style="margin-left: 1em; font-size:0.8em;">
+                        <thead>
+                            <tr>
+                                <th>Incident Date</th>
+                                <th>Type</th>
+                                <th>Narrative</th>
+                                <th>Last Edit: User</th>
+                                <th>Last Edit: Date</tH>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="_log in supervisorLogs">
+                                <td>{{_log.Incident_Date}}</td>
+                                <td>{{_log.Log_Entry_Type}}</td>
+                                <td>{{_log.Log_Entry_Text}}</td>
+                                <td>{{_log.LastEditUser}}</td>
+                                <td>{{_log.LastEditDate}}</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
 
                 <!--Evaluation-->
-                <div class="col s6" style="border-left: solid 1px black;">
-                    <h5>Evaluation</h5>
-                    <br>
+                <div class="col m7 s12" style="border-left: solid 1px black;">
+                    <h4>Evaluation</h4>
                     <iframe :src="url_Eval"></iframe>
                 </div>
 
@@ -121,6 +141,7 @@
                 url_Eval: "",
                 urlTemplate_SA: "http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=86&recordNumber={{recordNumber}}",
                 url_SA: "",
+                supervisorLogs: [],
                 noRecordsFound: false,
                 recordsAreLoading: false
             },
@@ -142,7 +163,9 @@
                     
                     //Employee-Input data
                     _this.getEmployeeInputId(_this.evalId,function(){
-                        _this.getEmployeeInput(_this.employeeInputId)
+                        _this.getEmployeeInput(_this.employeeInputId, function(){
+                            _this.getSupervisorLogsForPastYear(_this.evalId)
+                        })
                     })
                 },
 
@@ -187,7 +210,7 @@
                     })
                 },
 
-                getEmployeeInput: function(_employeeInputId){
+                getEmployeeInput: function(_employeeInputId, _callback){
                     var _this = this
 
                     axios.post('https://query.cityoflewisville.com/v2', {
@@ -202,6 +225,38 @@
 
                         if (typeof _results.data[0][0] != 'undefined'){
                             _this.employeeInput = _results.data[0][0] //first record only
+
+                            //Execute callback
+                            _callback()
+                        }else{
+                            _this.employeeInputId = ""
+                            _this.noRecordsFound = true
+                            _this.recordsAreLoading = false
+                        }
+                        _this.recordsAreLoading = false
+                    })
+                    .catch(function(error){ 
+                        console.error(error)
+                        _this.employeeInputId = ""
+                        _this.noRecordsFound = true
+                        _this.recordsAreLoading = false
+                    })
+                },
+                getSupervisorLogsForPastYear: function(_evalId){
+                    var _this = this
+
+                    axios.post('https://query.cityoflewisville.com/v2', {
+                        webservice: "Evals_SupervisorLogs_GetByEmployeeId",
+                        auth_token: localStorage.colAuthToken,
+                        evalid: _evalId
+                    })
+                    .then(function(_results){  
+                        console.group("getSupervisorLogsForPastYear")  
+                        console.log(_results.data)
+                        console.groupEnd()
+
+                        if (typeof _results.data[0][0] != 'undefined'){
+                            _this.supervisorLogs = _results.data[0]
                         }else{
                             _this.employeeInputId = ""
                             _this.noRecordsFound = true
