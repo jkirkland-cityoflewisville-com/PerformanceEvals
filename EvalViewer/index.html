@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
 
-    <title>Evaluation</title>
+    <title>Evaluation Form</title>
     <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
@@ -23,6 +23,9 @@
     <!--Fonts-->
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 
+    <!--Materialize JS-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
     <!--VueJS-->
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     
@@ -35,18 +38,21 @@
 
     <style>
         [v-cloak] {display: none}
-        iframe {width:100%; height: calc(100vh - 250px);}
+        body{overflow:hidden;}
+        iframe {width:100%; height: calc(100vh - 200px); border:none;}
+        .main{height: calc(100vh - 105px);}
         table td{padding-top: 8px; padding-bottom: 8px;}
+        .collapsible-body{padding-top:10px; max-height:calc(100vh - 300px); overflow-y:scroll;}
     </style>
 </head>
 
-<body style="background-color:whitesmoke;">
+<body class="white">
     
     <div id="app" v-cloak>
         <div class="navbar">
             <nav>
                 <div class="nav-wrapper deep-purple white-text">
-                    <a class="brand-logo">&nbsp Evaluation</a>
+                    <a class="brand-logo">&nbsp Evaluation Form</a>
                 </div>
             </nav>       
         </div> <!--end navbar-->
@@ -59,63 +65,98 @@
         </div>
         
 
-        <div class="main white" style="margin-left:1em; margin-right:1em; border:solid 1px black;">     
+        <div class="main" style="margin-left:1em; margin-right:1em;">     
             
             <div class="row">                
                 
-                <div class="col m5 s12" style="overflow-y:scroll;">
+                <div class="col m4 s12">
+
+                    <h5>Other Forms</h5>
+                    <ul class="collapsible">
+
+                        <!--Employee-Input Form-->
+                        <li>
+                            <div class="collapsible-header"><i class="material-icons">person</i>Employee-Input Form</div>
+                            <div class="collapsible-body grey lighten-4">
+                                <p>This is the employee-input form for this employee for this evaluation.</p>
+                                <table>
+                                    <tr>
+                                        <td><b>Eval Period: Start Date</b></td>
+                                        <td>{{employeeInput[0].Evaluation_Period_Start_Date}}</td>
+                                        <td></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><b>Eval Period: End Date:</b></td>
+                                        <td>{{employeeInput[0].Evaluation_Period_End_Date}}</td>
+                                        <td></td>
+                                    </tr>
+                                    
+                                    <tr>
+                                        <td><b>Complete?</b></td>
+                                        <td class="valign-wrapper">{{(employeeInput[0].Is_Complete == true ? "YES" : "NO")}}</td>
+                                        <td>
+                                            <i class="material-icons green-text right-align" v-show="employeeInput[0].Is_Complete==true">check</i>
+                                            <i class="material-icons red-text right-align" v-show="employeeInput[0].Is_Complete==false">clear</i>
+                                        </td>                                       
+                                    </tr>
+                                </table>
+                                <br><br><br>
+                                <table>
+                                    <tr><td colspan="2"><b>Question: Accomplishments in the Past Review Period:</b></td></tr>
+                                    <tr><td colspan="2">{{employeeInput[0].Question_Accomplishments_Past_Review_Period}}</td></tr>
+            
+                                    <tr><td colspan="2"><b>Question: Strengths and Opportunities?</b></td></tr>
+                                    <tr><td colspan="2">{{employeeInput[0].Question_Strengths_Opportunities}}</td></tr>
+            
+                                    <tr><td colspan="2"><b>Question: Suggestions or Comments?</b></td></tr>
+                                    <tr><td colspan="2">{{employeeInput[0].Question_Suggestions_Or_Comments}}</td></tr>
+            
+                                    <tr><td colspan="2"><b>Question: What can the City do to Help You?</b></td></tr>
+                                    <tr><td colspan="2">{{employeeInput[0].Question_What_Can_City_Do}}</td></tr>
+            
+                                    <tr><td colspan="2"><b>Question: Work Challenges</b></td></tr>
+                                    <tr><td colspan="2">{{employeeInput[0].Question_Work_Challenges}}</td></tr>
+                                </table>
+                            </div>
+                        </li>
+
+                        <!--Supervisor Logs-->
+                        <li>
+                            <div class="collapsible-header"><i class="material-icons">wrap_text</i>Supervisor Logs <span class="new badge" data-badge-caption="entries">{{supervisorLogs.length}}</span></div>
+                            <div class="collapsible-body grey lighten-4">
+                                <p>The following are the supervisor-log entries for this employee between the start and end of this review period.</p>
+
+                                <div v-show="supervisorLogs.length == 0">No supervisor logs found</div>
+
+                                <div v-for="_log in supervisorLogs">
+                                    <table class="z-depth-1 white" style="font-size:0.9em;">
+                                        <tr>
+                                            <td><b>Date:</b></td><td>{{_log.Incident_Date}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Type:</b></td><td>{{_log.Log_Entry_Type}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Narrative:</b></td><td>{{_log.Log_Entry_Text}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Last Edit:</b></td><td>{{_log.LastEditUser}} at {{_log.LastEditDate}}</td>
+                                        </tr>
+                                    </table>
+                                    <br><br>
+                                </div>
+
+                            </div>
+                        </li>
+                    </ul>         
                     
-                    <!--Employee-Input Form-->
-                    <h4>Employee Input Form</h4>
-                    <table style="margin-left: 1em; font-size:0.8em;">
-                        <tr><td><b>Eval Period: Start</b></td><td><b>Eval Period: End</b></td></tr>
-                        <tr><td>{{employeeInput.Evaluation_Period_Start_Date}}</td><td>{{employeeInput.Evaluation_Period_End_Date}}</td></tr>
-
-                        <tr><td colspan="2"><b>Question_Accomplishments_Past_Review_Period</b></td></tr>
-                        <tr><td colspan="2">{{employeeInput.Question_Accomplishments_Past_Review_Period}}</td></tr>
-
-                        <tr><td colspan="2"><b>Question_Strengths_Opportunities</b></td></tr>
-                        <tr><td colspan="2">{{employeeInput.Question_Strengths_Opportunities}}</td></tr>
-
-                        <tr><td colspan="2"><b>Question_Suggestions_Or_Comments</b></td></tr>
-                        <tr><td colspan="2">{{employeeInput.Question_Suggestions_Or_Comments}}</td></tr>
-
-                        <tr><td colspan="2"><b>Question_What_Can_City_Do</b></td></tr>
-                        <tr><td colspan="2">{{employeeInput.Question_What_Can_City_Do}}</td></tr>
-
-                        <tr><td colspan="2"><b>Question_Work_Challenges</b></td></tr>
-                        <tr><td colspan="2">{{employeeInput.Question_Work_Challenges}}</td></tr>
-                    </table>
-                    <br>
-
-                    <!--Supervisor Logs-->
-                    <h4>Supervisor Logs</h4>                    
-                    <table style="margin-left: 1em; font-size:0.8em;">
-                        <thead>
-                            <tr>
-                                <th>Incident Date</th>
-                                <th>Type</th>
-                                <th>Narrative</th>
-                                <th>Last Edit: User</th>
-                                <th>Last Edit: Date</tH>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="_log in supervisorLogs">
-                                <td>{{_log.Incident_Date}}</td>
-                                <td>{{_log.Log_Entry_Type}}</td>
-                                <td>{{_log.Log_Entry_Text}}</td>
-                                <td>{{_log.LastEditUser}}</td>
-                                <td>{{_log.LastEditDate}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
 
                 <!--Evaluation-->
-                <div class="col m7 s12" style="border-left: solid 1px black;">
-                    <h4>Evaluation</h4>
-                    <iframe :src="url_Eval"></iframe>
+                <div class="col m8 s12">
+                    <h5>Evaluation {{(employeeInput.length > 0 ? "for " + employeeInput[0].EmployeeName : "")}}</h5>
+                    <iframe class="z-depth-3" :src="url_Eval"></iframe>
                 </div>
 
             </div>
@@ -136,7 +177,7 @@
                 username: "",
                 evalId: "",
                 employeeInputId: "",
-                employeeInput: [],
+                employeeInput: [{}],
                 urlTemplate_Eval: "http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=87&recordNumber={{recordNumber}}",
                 url_Eval: "",
                 urlTemplate_SA: "http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=86&recordNumber={{recordNumber}}",
@@ -149,6 +190,8 @@
 
                 init: function(){
                     var _this = this
+                    
+                    _this.setUI()
 
                     //Oauth
                     setTimeout(function(){
@@ -167,6 +210,12 @@
                             _this.getSupervisorLogsForPastYear(_this.evalId)
                         })
                     })
+                },
+                
+                setUI: function(){
+                    //Collapsibles
+                    var _collapsibles = document.querySelectorAll('.collapsible');
+                    var _collapsiblesI = M.Collapsible.init(_collapsibles);
                 },
 
                 getUrlParameter: function(_name){
@@ -224,7 +273,7 @@
                         console.groupEnd()
 
                         if (typeof _results.data[0][0] != 'undefined'){
-                            _this.employeeInput = _results.data[0][0] //first record only
+                            _this.employeeInput[0] = _results.data[0][0] //first record only
 
                             //Execute callback
                             _callback()
