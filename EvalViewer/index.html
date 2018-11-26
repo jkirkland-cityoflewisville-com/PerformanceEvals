@@ -53,6 +53,10 @@
             <nav>
                 <div class="nav-wrapper deep-purple white-text">
                     <a class="brand-logo">&nbsp Evaluation Form</a>
+                    <ul id="nav-mobile" class="right hide-on-med-and-down">
+                        <li><a href="sass.html"><i class="material-icons left">print</i>Print</a></li>
+                        <li><a href=""></a></li>
+                    </ul>
                 </div>
             </nav>       
         </div> <!--end navbar-->
@@ -178,10 +182,11 @@
                 evalId: "",
                 employeeInputId: "",
                 employeeInput: [{}],
-                urlTemplate_Eval: "https://forms.cityoflewisville.com/formentry/index.html?formID=87&recordNumber={{recordNumber}}",
+                urlTemplate_Eval: "http://apps.cityoflewisville.com/GitLocal/Christina/PSOFIA_V2/formentry/index.html?formID=87&recordNumber={{recordNumber}}",
                 url_Eval: "",
                 urlTemplate_SA: "https://forms.cityoflewisville.com/formentry/index.html?formID=86&recordNumber={{recordNumber}}",
                 url_SA: "",
+                urlPrint: 'http://apps.cityoflewisville.com/reports/report/HumanResources/Evaluation_PrintableForms',
                 supervisorLogs: [],
                 noRecordsFound: false,
                 recordsAreLoading: false

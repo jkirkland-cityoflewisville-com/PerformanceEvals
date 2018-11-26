@@ -36,11 +36,14 @@
     <style>
         [v-cloak] {display: none}
         *{font-family:Roboto;}
+        select{display:block; width: 200px;}
         .container{max-width: 1100px; padding:1.5em; padding-bottom:3em; margin-bottom:20em !important; box-shadow: 0 0 0 0.75pt #d1d1d1, 0 0 3pt 0.75pt #ccc;}        
         .collection-header >h5 {margin-top:10px; margin-bottom:2px; margin-left:5px;}
         .collection-item {padding-top:2px !important;}
-        .collection-item > h6 {font-weight: bold;}
+        .collection-item > h6 {font-weight: bold; font-size: 1.4em;}
         .collection-item > a {margin-left:-13px;}
+        .record-container { font-size:0.9em; margin-left:0.5em !important; }
+        .record-container .row { border-bottom: solid 1px gainsboro;}
     </style>
 </head>
 
@@ -50,7 +53,7 @@
         <div class="navbar">
             <nav>
                 <div class="nav-wrapper deep-purple white-text">
-                    <a class="brand-logo">&nbsp Evaluation Forms</a>
+                    <a class="brand-logo">&nbsp Performance Evaluations</a>
                 </div>
             </nav>       
         </div> <!--end navbar-->
@@ -68,30 +71,78 @@
             <div class="row">
                 <div class="col s12">
                     <p>
-                        <h4 class="center-align purple-text text-darken-3">City of Lewisville - Performance Evaluation System</h4>
+                        <div class="row valign-wrapper">
+                            <div class="col s9 right-align">
+                                Generate review for employee
+                                <br>
+                                <small>Only use this option when the system has not sent the automated email</small>
+                            </div>
+                            <div class="col s3 right-align">
+                                    <select v-model="selectedSubordinate">
+                                        <option disabled value="">Select employee</option>
+                                        <option v-for="employee in subordinates" v-bind:value="employee.EmployeeID">
+                                            {{ employee.EmployeeName }}
+                                        </option>
+                                    </select>
+                            </div>
+                        </div>
                         <br>
                         <ul class="collection white">
-
-                            <!--Annual Forms-->
-                            <!--<li class="collection-header purple-text text-darken-3"><h5>Annual Evaluation Forms</h5></li>-->
+                           
                             <li class="collection-item">
-                                <h6>Employee Input Form</h6>
+                                <h6>Employee-Input Forms</h6>
                                 Employees will receive an email 30 days before their evaluation due-date with a link to their input-form.
                                 <br>
                                 <i>New</i> Employee Input Forms can only be started once the employee receives the email with the link.
                                 <br>
-                                <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='self_assessments'; getRecords('self_assessments')">View All</a>
+                                <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='employee_input'; getRecords('employee_input')">View All</a>
+                                <br>
+
+                                <!--Records-->
+                                <div class="row record-container" v-show="records.length > 0 && formType == 'employee_input'">
+                                    
+                                    <div class="col s12" v-for="employee in employees">
+                                        <h6>{{employee.name}}</h6>
+                                        <div class="row black-text">
+                                            <div class="col s4">Employee</div>
+                                            <div class="col s4">Date</div>
+                                            <div class="col s4"></div>
+                                        </div>
+                                        <div class="row grey-text" v-for="record in recordsPerEmployee(employee.id)">
+                                            <div class="col s4">{{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</div>
+                                            <div class="col s4"><a :href="record.link" target="_blank">Open Form</a></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </li>
+
                             <li class="collection-item">
                                 <h6>Evaluations</h6> 
-                                Supervisors will receive an email 30 days pior to an employee's evaluation due-date with a link to the evaluation form.
+                                Supervisors will receive an email 30 days prior to an employee's evaluation due-date with a link to the evaluation form.
                                 <br>
                                 <i>New</i> evaluations can only be started once the supervisor receives the email with the link.
                                 <br>
                                 <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='evaluations'; getRecords('evaluations')">View All</a>
+                                <br>
+
+                                <!--Records-->
+                                <div class="row record-container" v-show="records.length > 0 && formType == 'evaluations'">
+                                    <div class="col s12" v-for="employee in employees">
+                                        <h6>{{employee.name}}</h6>
+                                        <div class="row black-text">
+                                            <div class="col s4">Employee</div>
+                                            <div class="col s4">Date</div>
+                                            <div class="col s4"></div>
+                                        </div>
+                                        <div class="row grey-text" v-for="record in recordsPerEmployee(employee.id)">
+                                            <div class="col s4">{{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</div>
+                                            <div class="col s4"><a :href="record.link" target="_blank">Open Form</a></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </li>
 
-                            <!--<li class="collection-header purple-text text-darken-3"><h5>Supervisor Logs</h5></li>-->
+                            
                             <li class="collection-item">
                                 <h6>Supervisor Logs</h6> 
                                 Supervisors should use this area to log counseling, oral reprimands, written reprimands and suspensions.
@@ -99,6 +150,24 @@
                                 <a class="waves-effect waves-teal btn-flat blue-text" href="https://forms.cityoflewisville.com/formentry/index.html?formID=88" target="_blank">New</a>
                                 &nbsp <span class="grey-text">|</span> &nbsp
                                 <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='supervisor_logs'; getRecords('supervisor_logs')">View All</a>
+                                <br>
+
+                                <!--Records-->
+                                <div class="row record-container" v-show="records.length > 0 && formType == 'supervisor_logs'">
+                                    <div class="col s12" v-for="employee in employees">
+                                        <h6>{{employee.name}}</h6>
+                                        <div class="row black-text">
+                                            <div class="col s4">Date</div>
+                                            <div class="col s4">Type</div>
+                                            <div class="col s4"></div>
+                                        </div>
+                                        <div class="row grey-text" v-for="record in recordsPerEmployee(employee.id)">
+                                            <div class="col s4">{{formatDate(record.Incident_Date)}}</div>
+                                            <div class="col s4">{{record.Log_Entry_Type}}</div>
+                                            <div class="col s4"><a :href="record.link" target="_blank">Open Form</a></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </li>
                         </ul>
                     </p>
@@ -114,23 +183,11 @@
 
             <!--No records found-->
             <div class="row" v-show="noRecordsFound == true">
-                    <div class="col s12 center-align">
-                        No {{formTypePretty}} Found
-                    </div>
-                </div>
-
-            <!--Records-->
-            <div class="row" v-show="records.length > 0">
-                <div class="col s12">
-                    <h4>{{formTypePretty}}</h4>
-                    <div class="row" v-for="record in records">
-                        <div class="col s12">
-                            <a :href="record.link" target="_blank">{{record.EmployeeName}} <span v-if="formType=='self_assessments' || formType=='evaluations'"> | {{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</span></a>
-                        </div>                        
-                        <div class="col s12"><hr></div>
-                    </div>
+                <div class="col s12 center-align">
+                    No {{formTypePretty}} Found
                 </div>
             </div>
+          
             
         </div> <!--end container-->
 
@@ -146,8 +203,11 @@
             el: "#app",
             data: {
                 records: [],
+                subordinates: [],
                 recordsAreLoading: false,
                 noRecordsFound: false,
+                noSubordinatesFound: false,
+                selectedSubordinate: '',
                 formType: "",
                 username: ""
             },
@@ -156,8 +216,36 @@
                     var _this = this
                     setTimeout(function(){
                         _this.username = localStorage.colEmail
+                        _this.getListOfSubordinates()
                     },1500)
                 },
+                getListOfSubordinates: function(){
+                    var _this = this
+
+                    axios.post('https://query.cityoflewisville.com/v2', {
+                        webservice: "Evals_GetListOfSubordinates",
+                        auth_token: localStorage.colAuthToken,
+                        employee_email: localStorage.colEmail,
+                        trim: true
+                    })
+                    .then(function(_results){  
+                        if (typeof _results.data[0][0] != 'undefined'){
+                            _this.subordinates = _results.data[0]
+                            console.log(_this.subordinates)
+                            if (_this.subordinates.length == 0){
+                                _this.noSubordinatesFound = true
+                            }
+                        }else{
+                            _this.subordinates.length = 0
+                            _this.noEmployeesFound = true
+                        }
+                    })
+                    .catch(function(error){ 
+                        console.error(error)
+                        _this.subordinates.length = 0
+                        _this.noSubordinatesFound = true
+                    })
+                },                
                 getRecords: function(_formType){
                     var _this = this
 
@@ -175,7 +263,7 @@
                     .then(function(_results){  
                         if (typeof _results.data[0][0] != 'undefined'){
                             _this.records = _results.data[0]
-
+                            console.log(_this.employees)
                             if (_this.records.length == 0){
                                 _this.noRecordsFound = true
                             }
@@ -195,8 +283,19 @@
                 },
                 formatDate: function(_sqlFormattedDateTime){
                     var _this = this
-                    return _sqlFormattedDateTime.substr(0,10)
-                }                
+                    if (typeof _sqlFormattedDateTime != 'undefined'){
+                        return _sqlFormattedDateTime.substr(0,10)
+                    }else{
+                        return ''
+                    }
+                },
+                recordsPerEmployee: function(_employeeId){
+                    var _this = this
+                    var _records = _this.records.filter(function(r){
+                        return r.Employee_ID == _employeeId
+                    })
+                    return _records
+                }                        
             },
             computed:{
                 formTypePretty: function(){
@@ -204,9 +303,25 @@
                     var _formTypePretty = 'Unknown'
                     if (_this.formType == 'accomplishments'){ _formTypePretty = 'Accomplishments' }
                     if (_this.formType == 'evaluations'){ _formTypePretty = 'Evaluations' }
-                    if (_this.formType == 'self_assessments'){ _formTypePretty = 'Employee-Input Forms' }
+                    if (_this.formType == 'employee_input'){ _formTypePretty = 'Employee-Input Forms' }
                     if (_this.formType == 'supervisor_logs'){ _formTypePretty = 'Supervisor Logs' }
                     return _formTypePretty
+                },
+                employees: function(){                    
+                    var _this = this
+                    var _employees = _this.records.map(function(_obj) { 
+                        return _obj.Employee_ID
+                    })
+                    _employees = _employees.filter(function(v,i) { 
+                        return _employees.indexOf(v) == i; 
+                    })
+                    var _employees2 = _employees.map(function(r){
+                        var _name = _this.records.filter(function(n){
+                            return n.Employee_ID == r
+                        })[0].EmployeeName
+                        return {id: r, name: _name}
+                    })
+                    return _employees2
                 }
             }
         });

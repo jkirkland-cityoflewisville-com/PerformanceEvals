@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+
+    <title>Other Authorized Users</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png">
+    <link rel="manifest" href="../icons/site.webmanifest">
+    <link rel="mask-icon" href="../icons/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="../icons/favicon.ico">
+    <meta name="msapplication-TileColor" content="#603cba">
+    <meta name="msapplication-config" content="../icons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!--Fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+    <!--Materialize JS-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!--VueJS-->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!--Security-->
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="../oauth/colsecurity.js""></script>
+
+    <style>
+        [v-cloak] {display: none}
+        body{overflow:hidden;}
+        iframe {width:100%; height: calc(100vh - 200px); border:none;}
+        .main{height: calc(100vh - 105px);}
+        table td{padding-top: 8px; padding-bottom: 8px;}
+        .collapsible-body{padding-top:10px; max-height:calc(100vh - 300px); overflow-y:scroll;}
+    </style>
+</head>
+
+<body class="white">
+    
+    <div id="app" v-cloak>
+        <div class="navbar">
+            <nav>
+                <div class="nav-wrapper deep-purple white-text">
+                    <a class="brand-logo">&nbsp Other Authorized Users</a>
+                    <ul id="nav-mobile" class="right hide-on-med-and-down">
+                        <li><a href="http://apps.cityoflewisville.com/psofia_v2/formentry/index.html?formID=89"><i class="material-icons left">add</i> Add User</a></li>
+                    </ul>
+                </div>
+            </nav>       
+        </div> <!--end navbar-->
+       
+        <!--Username-->
+        <div class="row">
+            <div class="col s12">
+                {{(username.length == 0 ? "Getting username..." : username)}}
+            </div>
+        </div>
+        
+
+        <div class="main" style="margin-left:1em; margin-right:1em;">     
+            
+            <div class="row">                
+                
+                <div class="col s12" style="overflow-y:scroll; height: calc(100vh - 200px);">
+
+                    <h5>Users who can see all</h5>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Employee</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="user in users">
+                                <td>{{user.Department}}</td>
+                                <td><b>{{user.EmployeeName}}</b> can see all <b>{{user.Section}}</b> for this department and is cc'd on all emails</td>
+                                <td><button v-on:click="deleteOtherAuthorizedUser(user.RecordNumber)">Remove Authorization</button></td>
+                            </tr>
+                        </tbody>
+                    </table>         
+                    
+                </div>
+
+            </div>
+
+        </div> <!--end container-->
+
+    </div>  <!--end app-->
+
+    <!--=======================================================-->
+    <!--Javascript-->
+    <!--=======================================================-->
+    <script>
+        "use strict"
+
+        var app = new Vue({
+            el: "#app",
+            data: {                
+                username: "",
+                users: [],
+                url_AddNewSuperUser: "http://apps.cityoflewisville.com/gitlocal/christina/psofia_v2/formentry/index.html?formID=89",
+                noRecordsFound: false,
+                recordsAreLoading: false
+            },
+            methods: {
+
+                init: function(){
+                    var _this = this
+                    
+                    _this.setUI()
+
+                    //Oauth
+                    setTimeout(function(){
+                        _this.username = localStorage.colEmail
+                    },1500)
+
+                    _this.getOtherAuthorizedUsers()
+                    
+                },
+                
+                setUI: function(){
+                    //Collapsibles
+                    var _collapsibles = document.querySelectorAll('.collapsible');
+                    var _collapsiblesI = M.Collapsible.init(_collapsibles);
+                },
+
+                getOtherAuthorizedUsers: function(){
+                    var _this = this
+
+                    axios.post('https://query.cityoflewisville.com/v2', {
+                        webservice: "Evals_OtherAuthorizedUsers_GetAll",
+                        auth_token: localStorage.colAuthToken
+                    })
+                    .then(function(_results){ 
+                        if (typeof _results.data.Users != 'undefined'){
+                            _this.users = _results.data.Users
+                        }else{
+                            _this.users = []
+                            _this.noRecordsFound = true
+                            _this.recordsAreLoading = false
+                        }
+                        _this.recordsAreLoading = false
+                    })
+                    .catch(function(error){ 
+                        console.error(error)
+                        _this.users = []
+                        _this.noRecordsFound = true
+                        _this.recordsAreLoading = false
+                    })
+                },
+                deleteOtherAuthorizedUser: function(_recordNumber){
+                    var _this = this
+
+                    axios.post('https://query.cityoflewisville.com/v2', {
+                        webservice: "Evals_OtherAuthorizedUsers_Delete",
+                        auth_token: localStorage.colAuthToken,
+                        recordnumber: _recordNumber,
+                        useremail: localStorage.colEmail
+                    })
+                    .then(function(_results){
+                        if (typeof _results.data[0] != 'undefined'){
+                            if (_results.data[0][0].message == 'success'){
+                                M.toast({html: 'Deleted'})
+                            }else{
+                                M.toast({html: 'Error. Record not deleted'})
+                            }
+                        }
+                    })
+                    .catch(function(error){ 
+                        console.error(error)
+                    })
+                }
+            },
+            computed: {
+                usersByDepartment: function(){
+                    var _this = this
+                    return _this.users.filter(function(_u){
+                        return _u.DepartmentId == _this.selectedDepartmentId
+                    })
+                }
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function(){
+            app.init()
+        })
+        
+    </script>
+</body>
+</html> 
