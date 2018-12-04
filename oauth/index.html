@@ -7,9 +7,7 @@
 <body>
 	<script>
 		;(function() {   
-            if (window.location.host === 'apps') {
-                window.location = 'http://apps.cityoflewisville.com' + window.location.pathname + window.location.search + window.location.hash;
-            } else {
+            
                 var apiUrl, oauthRedirectUrl;
                 if (window.location.href.split('://')[1].split('.')[0].toLowerCase() !== 'apps') {
                     apiUrl = 'https://query.cityoflewisville.com/';
@@ -81,7 +79,7 @@
                         getNewColAuthToken(code);
                     }
                 }
-            }
+                
         })();
 
 // If the code hasn't worked in 2 seconds, it's likely something went wrong. Reloads to try again. 

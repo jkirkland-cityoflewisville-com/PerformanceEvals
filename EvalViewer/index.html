@@ -39,7 +39,7 @@
     <style>
         [v-cloak] {display: none}
         body{overflow:hidden;}
-        iframe {width:100%; height: calc(100vh - 200px); border:none;}
+        iframe {width:100%; height: calc(100vh - 250px); border:none;}
         .main{height: calc(100vh - 105px);}
         table td{padding-top: 8px; padding-bottom: 8px;}
         .collapsible-body{padding-top:10px; max-height:calc(100vh - 300px); overflow-y:scroll;}
@@ -54,7 +54,7 @@
                 <div class="nav-wrapper deep-purple white-text">
                     <a class="brand-logo">&nbsp Evaluation Form</a>
                     <ul id="nav-mobile" class="right hide-on-med-and-down">
-                        <li><a href="sass.html"><i class="material-icons left">print</i>Print</a></li>
+                        <li><a v-bind:href="urlPrint.replace('{{recordNumber}}',evalId)"><i class="material-icons left">print</i>Print</a></li>
                         <li><a href=""></a></li>
                     </ul>
                 </div>
@@ -73,6 +73,7 @@
             
             <div class="row">                
                 
+                <!--Left Panel-->
                 <div class="col m4 s12">
 
                     <h5>Other Forms</h5>
@@ -80,7 +81,10 @@
 
                         <!--Employee-Input Form-->
                         <li>
-                            <div class="collapsible-header"><i class="material-icons">person</i>Employee-Input Form</div>
+                            <div class="collapsible-header"><i class="material-icons">person</i>Employee-Input Form 
+                                <span v-show="employeeInput[0].Is_Complete==true" class="new badge" data-badge-caption="Complete"></span>
+                                <span v-show="employeeInput[0].Is_Complete==false" class="new badge red" data-badge-caption="Not Complete"></span>
+                            </div>
                             <div class="collapsible-body grey lighten-4">
                                 <p>This is the employee-input form for this employee for this evaluation.</p>
                                 <table>
@@ -121,6 +125,9 @@
             
                                     <tr><td colspan="2"><b>Question: Work Challenges</b></td></tr>
                                     <tr><td colspan="2">{{employeeInput[0].Question_Work_Challenges}}</td></tr>
+
+                                    <tr><td colspan="2"><b>Question: Professional Goals</b></td></tr>
+                                    <tr><td colspan="2">{{employeeInput[0].Question_Workplan_Status}}</td></tr>
                                 </table>
                             </div>
                         </li>
@@ -157,16 +164,41 @@
                     
                 </div>
 
+                <!--Right Panel-->
                 <!--Evaluation-->
                 <div class="col m8 s12">
-                    <h5>Evaluation {{(employeeInput.length > 0 ? "for " + employeeInput[0].EmployeeName : "")}}</h5>
+                    <h5>{{ ( typeof employeeInput[0].EmployeeName == 'undefined' ? '...' : 'Evaluation for ' + employeeInput[0].EmployeeName ) }}</h5>
                     <iframe class="z-depth-3" :src="url_Eval"></iframe>
+                    <div class="row">
+                        <div class="col s12 m4"></div>
+                        <div class="col s12 m8">
+                            <a class="waves-effect waves-light btn modal-trigger" href="#modalResetApprovals">Return to Supervisor</a>
+                            <a class="waves-effect waves-light btn modal-trigger" href="#modalResetApprovals">Return to Director</a>
+                        </div>
+                    </div>
                 </div>
 
-            </div>
+            </div> <!--end row-->
+
+            
 
         </div> <!--end container-->
 
+
+        <!--Modal for resetting approvals-->
+        <div id="modalResetApprovals" class="modal">
+            <div class="modal-content">
+                <h4>Return this Evaluation</h4>
+                <p>Enter below the reason for returning this evaluation. This will uncheck (reset) all workflow approvals.</p>
+                <div class="input-field col s12">
+                    <textarea id="textarea1" class="materialize-textarea" v-model="resetApprovals_Why"></textarea>
+                    <label for="textarea1">Reason for returning evaluation</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-close waves-effect waves-green btn-flat" v-on:click="resetApprovals(resetApprovals_Why)">Send Back and Send Email</a>
+            </div>
+        </div>
     </div>  <!--end app-->
 
     <!--=======================================================-->
@@ -182,11 +214,12 @@
                 evalId: "",
                 employeeInputId: "",
                 employeeInput: [{}],
+                resetApprovals_Why: '',
                 urlTemplate_Eval: "http://apps.cityoflewisville.com/GitLocal/Christina/PSOFIA_V2/formentry/index.html?formID=87&recordNumber={{recordNumber}}",
                 url_Eval: "",
                 urlTemplate_SA: "https://forms.cityoflewisville.com/formentry/index.html?formID=86&recordNumber={{recordNumber}}",
                 url_SA: "",
-                urlPrint: 'http://apps.cityoflewisville.com/reports/report/HumanResources/Evaluation_PrintableForms',
+                urlPrint: 'http://ax1vsql8/ReportServer/Pages/ReportViewer.aspx?/HumanResources/Evaluation_PrintableForms&rs:Command=Render&RecordNumber={{recordNumber}}',
                 supervisorLogs: [],
                 noRecordsFound: false,
                 recordsAreLoading: false
@@ -221,6 +254,10 @@
                     //Collapsibles
                     var _collapsibles = document.querySelectorAll('.collapsible');
                     var _collapsiblesI = M.Collapsible.init(_collapsibles);
+
+                    //Modals
+                    var _modals = document.querySelectorAll('.modal');
+                    var _modalsI = M.Modal.init(_modals);
                 },
 
                 getUrlParameter: function(_name){
@@ -323,6 +360,26 @@
                         _this.employeeInputId = ""
                         _this.noRecordsFound = true
                         _this.recordsAreLoading = false
+                    })
+                },
+                resetApprovals: function(_why){
+                    var _this = this
+                    var _evalId = _this.evalId
+                    
+                    axios.post('https://query.cityoflewisville.com/v2', {
+                        webservice: "Evals_ResetApprovals",
+                        auth_token: localStorage.colAuthToken,
+                        recordnumber: _evalId,
+                        useremail: _this.username,
+                        why: _why
+                    })
+                    .then(function(_results){
+                        if (typeof _results.data[0][0] != 'undefined'){
+                           window.location.reload()  
+                        }
+                    })
+                    .catch(function(error){ 
+                        console.error(error)
                     })
                 }
             }

@@ -23,6 +23,9 @@
     <!--Fonts-->
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 
+    <!--Materialize JS-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    
     <!--VueJS-->
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     
@@ -72,18 +75,21 @@
                 <div class="col s12">
                     <p>
                         <div class="row valign-wrapper">
-                            <div class="col s9 right-align">
+                            <div class="col s8 right-align">
                                 Generate review for employee
                                 <br>
                                 <small>Only use this option when the system has not sent the automated email</small>
                             </div>
                             <div class="col s3 right-align">
-                                    <select v-model="selectedSubordinate">
-                                        <option disabled value="">Select employee</option>
-                                        <option v-for="employee in subordinates" v-bind:value="employee.EmployeeID">
-                                            {{ employee.EmployeeName }}
-                                        </option>
-                                    </select>
+                                <select v-model="selectedSubordinate">
+                                    <option disabled value="">Select employee</option>
+                                    <option v-for="employee in subordinates" v-bind:value="employee.EmployeeEmail">
+                                        {{ employee.EmployeeName }}
+                                    </option>
+                                </select>                                    
+                            </div>
+                            <div class="col s1">
+                                <button v-on:click="kickOffEvalProcess(selectedSubordinate)">Go</button>
                             </div>
                         </div>
                         <br>
@@ -130,13 +136,14 @@
                                     <div class="col s12" v-for="employee in employees">
                                         <h6>{{employee.name}}</h6>
                                         <div class="row black-text">
-                                            <div class="col s4">Employee</div>
-                                            <div class="col s4">Date</div>
+                                            <div class="col s4">Review Period</div>
+                                            <div class="col s4"></div>
                                             <div class="col s4"></div>
                                         </div>
                                         <div class="row grey-text" v-for="record in recordsPerEmployee(employee.id)">
                                             <div class="col s4">{{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</div>
-                                            <div class="col s4"><a :href="record.link" target="_blank">Open Form</a></div>
+                                            <div v-show="record.isSelf==0" class="col s4"><a :href="record.link" target="_blank">Open Form</a></div>
+                                            <div v-show="record.isSelf!=0" class="col s4"><a :href="record.viewOnlyLink" target="_blank">Open Form</a></div>
                                         </div>
                                     </div>
                                 </div>
@@ -145,9 +152,9 @@
                             
                             <li class="collection-item">
                                 <h6>Supervisor Logs</h6> 
-                                Supervisors should use this area to log counseling, oral reprimands, written reprimands and suspensions.
+                                Supervisors should use this area to log counseling and oral reprimands.
                                 <br>
-                                <a class="waves-effect waves-teal btn-flat blue-text" href="https://forms.cityoflewisville.com/formentry/index.html?formID=88" target="_blank">New</a>
+                                <a class="waves-effect waves-teal btn-flat blue-text" v-show="this.isSupervisorFlag===1" href="http://apps.cityoflewisville.com/PSOFIA_v2/formentry/index.html?formID=88" target="_blank">New</a>
                                 &nbsp <span class="grey-text">|</span> &nbsp
                                 <a class="waves-effect waves-teal btn-flat blue-text" @click="formType='supervisor_logs'; getRecords('supervisor_logs')">View All</a>
                                 <br>
@@ -157,14 +164,16 @@
                                     <div class="col s12" v-for="employee in employees">
                                         <h6>{{employee.name}}</h6>
                                         <div class="row black-text">
-                                            <div class="col s4">Date</div>
-                                            <div class="col s4">Type</div>
-                                            <div class="col s4"></div>
+                                            <div class="col s2">Date</div>
+                                            <div class="col s3">Type</div>
+											<div class="col s5">Narrative</div>
+                                            <div class="col s2"></div>
                                         </div>
                                         <div class="row grey-text" v-for="record in recordsPerEmployee(employee.id)">
-                                            <div class="col s4">{{formatDate(record.Incident_Date)}}</div>
-                                            <div class="col s4">{{record.Log_Entry_Type}}</div>
-                                            <div class="col s4"><a :href="record.link" target="_blank">Open Form</a></div>
+                                            <div class="col s2">{{formatDate(record.Incident_Date)}}</div>
+                                            <div class="col s3">{{record.Log_Entry_Type}}</div>
+											<div class="col s5">{{record.Log_Entry_Text}}</div>											
+                                            <div class="col s2" v-show="record.isSelf==0"><a :href="record.link" target="_blank">Open Form</a></div>
                                         </div>
                                     </div>
                                 </div>
@@ -209,7 +218,8 @@
                 noSubordinatesFound: false,
                 selectedSubordinate: '',
                 formType: "",
-                username: ""
+                username: "",
+                isSupervisorFlag: 0
             },
             methods: {
                 init: function(){
@@ -229,8 +239,8 @@
                         trim: true
                     })
                     .then(function(_results){  
-                        if (typeof _results.data[0][0] != 'undefined'){
-                            _this.subordinates = _results.data[0]
+                        if (typeof _results.data.Emp != 'undefined'){
+                            _this.subordinates = _results.data.Emp
                             console.log(_this.subordinates)
                             if (_this.subordinates.length == 0){
                                 _this.noSubordinatesFound = true
@@ -239,6 +249,12 @@
                             _this.subordinates.length = 0
                             _this.noEmployeesFound = true
                         }
+
+                        if(_results.data.SupvFlag[0].isSupervisorFlag == 1){
+                            //if Supervisor then show the Supervisor Logs New link
+                            _this.isSupervisorFlag = 1
+                        }
+
                     })
                     .catch(function(error){ 
                         console.error(error)
@@ -281,6 +297,26 @@
                         _this.recordsAreLoading = false
                     })
                 },
+
+                kickOffEvalProcess: function(_employeeEmail){
+                    var _this = this
+
+                    axios.post('https://query.cityoflewisville.com/v2', {
+                        webservice: "Evals_ForceEvalKickOff",
+                        auth_token: localStorage.colAuthToken,
+                        employeeemail: _employeeEmail
+                    })
+                    .then(function(_results){  
+                        if (typeof _results.data[0][0] != 'undefined'){
+                            M.toast({html:"You should receive an email."})
+                        }
+                    })
+                    .catch(function(error){ 
+                        console.error(error)
+                        M.toast({html:"Error"})
+                    })
+                },
+
                 formatDate: function(_sqlFormattedDateTime){
                     var _this = this
                     if (typeof _sqlFormattedDateTime != 'undefined'){
