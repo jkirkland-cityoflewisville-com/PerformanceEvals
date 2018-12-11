@@ -109,13 +109,17 @@
                                     
                                     <div class="col s12" v-for="employee in employees">
                                         <h6>{{employee.name}}</h6>
-                                        <div class="row black-text">
-                                            <div class="col s4">Employee</div>
-                                            <div class="col s4">Date</div>
-                                            <div class="col s4"></div>
+                                        <div class="row black-text" style="margin-bottom: 5px;">
+                                            <div class="col s4">Review Period</div>
+                                            <div class="col s4">Status</div>
+                                            <div class="col s4">Link</div>
                                         </div>
-                                        <div class="row grey-text" v-for="record in recordsPerEmployee(employee.id)">
-                                            <div class="col s4">{{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</div>
+                                        <div class="row grey-text" style="margin-top:5px; margin-bottom: 5px;" v-for="record in recordsPerEmployee(employee.id)">
+                                            <div class="col s4">{{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</div>                                            
+                                            <div class="col s4">
+                                                <span v-show="record.Is_Complete==true" class="new badge grey" style="float:left; margin-left:0;" data-badge-caption="Complete"></span>
+                                                <span v-show="record.Is_Complete==false" class="new badge green" style="float:left; margin-left:0;" data-badge-caption="Pending"></span>
+                                            </div>
                                             <div class="col s4"><a :href="record.link" target="_blank">Open Form</a></div>
                                         </div>
                                     </div>
@@ -135,15 +139,31 @@
                                 <div class="row record-container" v-show="records.length > 0 && formType == 'evaluations'">
                                     <div class="col s12" v-for="employee in employees">
                                         <h6>{{employee.name}}</h6>
-                                        <div class="row black-text">
-                                            <div class="col s4">Review Period</div>
-                                            <div class="col s4"></div>
-                                            <div class="col s4"></div>
+                                        <div class="row black-text" style="margin-bottom: 5px;">
+                                            <div class="col s3">Review Period</div>
+                                            <div class="col s2">Supervisor</div>
+                                            <div class="col s2">Department</div>
+                                            <div class="col s2">HR</div>
+                                            <div class="col s3"><Link></Link></div>
                                         </div>
-                                        <div class="row grey-text" v-for="record in recordsPerEmployee(employee.id)">
-                                            <div class="col s4">{{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</div>
-                                            <div v-show="record.isSelf==0" class="col s4"><a :href="record.link" target="_blank">Open Form</a></div>
-                                            <div v-show="record.isSelf!=0" class="col s4"><a :href="record.viewOnlyLink" target="_blank">Open Form</a></div>
+                                        <div class="row grey-text" style="margin-bottom: 5px;" v-for="record in recordsPerEmployee(employee.id)">
+                                            <div class="col s3">{{formatDate(record.Evaluation_Period_Start_Date)}} to {{formatDate(record.Evaluation_Period_End_Date)}}</div>
+                                            <div class="col s2">
+                                                <span v-show="record.Is_Complete_Supervisor==true" class="new badge grey" style="float:left; margin-left:0;" data-badge-caption="Complete"></span>
+                                                <span v-show="record.Is_Complete_Supervisor==false" class="new badge green" style="float:left; margin-left:0;" data-badge-caption="Pending"></span>
+                                            </div>
+                                            <div class="col s2">
+                                                <span v-show="record.Is_Complete_Department==true" class="new badge grey" style="float:left; margin-left:0;" data-badge-caption="Complete"></span>
+                                                <span v-show="record.Is_Complete_Department==false" class="new badge green" style="float:left; margin-left:0;" data-badge-caption="Pending"></span>
+                                            </div>
+                                            <div class="col s2">
+                                                <span v-show="record.Is_Complete_HR==true" class="new badge grey" style="float:left; margin-left:0;" data-badge-caption="Complete"></span>
+                                                <span v-show="record.Is_Complete_HR==false" class="new badge green" style="float:left; margin-left:0;" data-badge-caption="Pending"></span>
+                                            </div>
+                                            <div class="col s3">
+                                                <a v-show="record.isSelf==0" :href="record.link" target="_blank">Open Form</a>
+                                                <a v-show="record.isSelf!=0" :href="record.viewOnlyLink" target="_blank">Open Form</a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -180,6 +200,9 @@
                             </li>
                         </ul>
                     </p>
+                    <div>
+                        <a class="waves-effect waves-light btn deep-purple white-text" id="Peer" v-on:click="LaunchURL()" >Submit Peer Recognition</a>
+                    </div>
                 </div>
             </div>
 
@@ -331,7 +354,10 @@
                         return r.Employee_ID == _employeeId
                     })
                     return _records
-                }                        
+                } ,
+                LaunchURL: function(){
+                    window.open("http://apps.cityoflewisville.com/PSOFIA_v2/formentry/index.html?formID=92",'_blank')
+                }                       
             },
             computed:{
                 formTypePretty: function(){
